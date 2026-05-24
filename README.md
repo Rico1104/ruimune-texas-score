@@ -24,6 +24,18 @@ npm run dev
 https://你的用户名.github.io/仓库名/
 ```
 
+## 在线房间
+
+如果要让朋友打开同一个网页后只输入 4 位房号即可加入，需要配置 Firebase Realtime Database。
+
+在 GitHub 仓库中进入 `Settings -> Secrets and variables -> Actions -> Variables`，添加变量：
+
+```text
+VITE_FIREBASE_DATABASE_URL=https://你的项目-default-rtdb.firebaseio.com
+```
+
+添加后重新运行 GitHub Actions 部署。管理员创建/修改房间后会写入线上数据库，普通玩家输入房号会从线上数据库读取。
+
 ## 分享房间
 
-当前 Demo 没有后端，房间数据不会跨设备实时同步。请在房间大厅点击“邀请好友”或“复制房号”，把生成的邀请链接发给朋友。朋友打开邀请链接后，再输入对应房号即可进入该房间快照。
+如果尚未配置 Firebase，房间数据不会跨设备实时同步。请在房间大厅点击“邀请好友”或“复制房号”，把生成的邀请链接发给朋友。朋友打开邀请链接后，再输入对应房号即可进入该房间快照。

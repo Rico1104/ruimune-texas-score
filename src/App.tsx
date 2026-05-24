@@ -65,6 +65,7 @@ const defaultHistoricalPlayers: HistoricalPlayer[] = [
 
 const defaultLatestLogs = ["刚刚：阿杰 +1 补码", "刚刚：Rico +1 补码"];
 const lanShareOrigin = "http://192.168.3.150:5174";
+const onlineDatabaseUrl = (import.meta.env.VITE_FIREBASE_DATABASE_URL ?? "").replace(/\/$/, "");
 
 function readStorage<T>(key: string, fallback: T): T {
   try {
@@ -95,6 +96,10 @@ type SharedRoomPayload = {
   latestLogs: string[];
 };
 
+type OnlineRoomPayload = SharedRoomPayload & {
+  updatedAt: string;
+};
+
 function encodeSharePayload(payload: SharedRoomPayload) {
   return window.btoa(encodeURIComponent(JSON.stringify(payload)));
 }
@@ -116,6 +121,26 @@ function resetForNewRoom(player: Player, defaultBuyIn: number, adminName: string
   };
 }
 
+function roomPath(roomId: string) {
+  return `${onlineDatabaseUrl}/rooms/${encodeURIComponent(roomId)}.json`;
+}
+
+async function saveOnlineRoom(payload: SharedRoomPayload) {
+  if (!onlineDatabaseUrl || !payload.room.roomId) return;
+  await fetch(roomPath(payload.room.roomId), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...payload, updatedAt: nowIso() } satisfies OnlineRoomPayload),
+  });
+}
+
+async function loadOnlineRoom(roomId: string) {
+  if (!onlineDatabaseUrl) return null;
+  const response = await fetch(roomPath(roomId), { method: "GET" });
+  if (!response.ok) throw new Error("Failed to load room");
+  return (await response.json()) as OnlineRoomPayload | null;
+}
+
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>("home");
   const [currentRole, setCurrentRole] = useState<Role>("admin");
@@ -135,12 +160,21 @@ export default function App() {
   });
   const [confirmDelete, setConfirmDelete] = useState<Player | null>(null);
   const [pendingRebuy, setPendingRebuy] = useState<{ player: Player; delta: 1 | -1 } | null>(null);
+  const [isJoining, setIsJoining] = useState(false);
 
   useEffect(() => localStorage.setItem(STORAGE.room, JSON.stringify(room)), [room]);
   useEffect(() => localStorage.setItem(STORAGE.players, JSON.stringify(players)), [players]);
   useEffect(() => localStorage.setItem(STORAGE.historicalPlayers, JSON.stringify(historicalPlayers)), [historicalPlayers]);
   useEffect(() => localStorage.setItem(STORAGE.latestLogs, JSON.stringify(latestLogs)), [latestLogs]);
   useEffect(() => localStorage.setItem(STORAGE.savedResults, JSON.stringify(savedResults)), [savedResults]);
+
+  useEffect(() => {
+    if (currentRole !== "admin" || !onlineDatabaseUrl || !/^\d{4}$/.test(room.roomId)) return;
+    const handle = window.setTimeout(() => {
+      void saveOnlineRoom({ room, players, latestLogs });
+    }, 450);
+    return () => window.clearTimeout(handle);
+  }, [currentRole, room, players, latestLogs]);
 
   const showToast = (message: string) => {
     setToast(message);
@@ -150,8 +184,20 @@ export default function App() {
   useEffect(() => {
     const url = new URL(window.location.href);
     const share = url.searchParams.get("share");
-    if (!share) return;
+    const roomCode = url.searchParams.get("room");
+    if (!share && !roomCode) return;
 
+    if (roomCode && /^\d{4}$/.test(roomCode)) {
+      setJoinCode(roomCode);
+      setCurrentRole("player");
+      setCurrentPage("joinRoom");
+      showToast(`房号 ${roomCode} 已填好，点击进入房间`);
+      url.searchParams.delete("room");
+      window.history.replaceState({}, "", url.toString());
+      return;
+    }
+
+    if (!share) return;
     const payload = decodeSharePayload(share);
     if (!payload?.room?.roomId || !Array.isArray(payload.players)) {
       showToast("分享链接失效，请让房主重新复制邀请链接");
@@ -353,7 +399,8 @@ export default function App() {
       url.hostname = lanUrl.hostname;
       url.port = lanUrl.port;
     }
-    url.searchParams.set("share", encodeSharePayload({ room, players, latestLogs }));
+    url.searchParams.delete("share");
+    url.searchParams.set("room", room.roomId);
     return url.toString();
   };
 
@@ -396,7 +443,33 @@ export default function App() {
     setCurrentPage(page);
   };
 
-  const joinRoom = () => {
+  const joinRoom = async () => {
+    if (!/^\d{4}$/.test(joinCode)) {
+      showToast("请输入 4 位房号");
+      return;
+    }
+
+    if (onlineDatabaseUrl) {
+      setIsJoining(true);
+      try {
+        const onlineRoom = await loadOnlineRoom(joinCode);
+        if (onlineRoom?.room?.roomId && Array.isArray(onlineRoom.players)) {
+          setRoom(onlineRoom.room);
+          setPlayers(onlineRoom.players);
+          setLatestLogs(onlineRoom.latestLogs ?? []);
+          setCurrentRole("player");
+          setCurrentPage(onlineRoom.room.status === "settled" ? "settlement" : "playerView");
+          showToast("已进入线上房间");
+          return;
+        }
+      } catch {
+        showToast("线上房间查询失败，请稍后再试");
+        return;
+      } finally {
+        setIsJoining(false);
+      }
+    }
+
     if (joinCode === room.roomId) {
       setCurrentRole("player");
       setCurrentPage(room.status === "settled" ? "settlement" : "playerView");
@@ -432,7 +505,7 @@ export default function App() {
           />
         )}
         {currentPage === "joinRoom" && (
-          <JoinRoomPage value={joinCode} onChange={setJoinCode} onJoin={joinRoom} onClear={() => setJoinCode("")} />
+          <JoinRoomPage value={joinCode} onChange={setJoinCode} onJoin={joinRoom} onClear={() => setJoinCode("")} isJoining={isJoining} />
         )}
         {currentPage === "roomLobby" && (
           <RoomLobbyPage
@@ -630,11 +703,13 @@ function JoinRoomPage({
   onChange,
   onJoin,
   onClear,
+  isJoining,
 }: {
   value: string;
   onChange: (value: string) => void;
   onJoin: () => void;
   onClear: () => void;
+  isJoining: boolean;
 }) {
   return (
     <>
@@ -644,7 +719,9 @@ function JoinRoomPage({
         <NumericKeypad value={value} onChange={onChange} />
       </ParchmentCard>
       <div className="mx-5 mt-4 grid grid-cols-2 gap-3">
-        <TavernButton onClick={onJoin}>进入房间</TavernButton>
+        <TavernButton onClick={onJoin} disabled={isJoining}>
+          {isJoining ? "查找中" : "进入房间"}
+        </TavernButton>
         <TavernButton variant="secondary" onClick={onClear}>
           清空重输
         </TavernButton>
