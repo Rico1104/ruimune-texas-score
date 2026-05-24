@@ -65,7 +65,7 @@ const defaultHistoricalPlayers: HistoricalPlayer[] = [
 
 const defaultLatestLogs = ["刚刚：阿杰 +1 补码", "刚刚：Rico +1 补码"];
 const lanShareOrigin = "http://192.168.3.150:5174";
-const onlineDatabaseUrl = (import.meta.env.VITE_FIREBASE_DATABASE_URL ?? "").replace(/\/$/, "");
+const onlineDatabaseUrl = (import.meta.env.VITE_FIREBASE_DATABASE_URL ?? "https://ruimune-texas-score-default-rtdb.firebaseio.com").replace(/\/$/, "");
 
 function readStorage<T>(key: string, fallback: T): T {
   try {
