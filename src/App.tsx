@@ -418,6 +418,16 @@ export default function App() {
     showToast("冠军榜已生成");
   };
 
+  const deleteChampionBoard = (board: ChampionBoard) => {
+    const confirmed = window.confirm(`确认删除「${board.roomName}」这场冠军榜吗？`);
+    if (!confirmed) return;
+    setChampionBoards((prev) => prev.filter((item) => item.id !== board.id));
+    if (championBoard?.id === board.id) {
+      setChampionBoard(null);
+    }
+    showToast("冠军榜已删除");
+  };
+
   const saveResult = () => {
     const date = nowIso();
     const resultPlayers = resultPlayersFrom(players);
@@ -618,7 +628,15 @@ export default function App() {
             onNewRound={newRound}
           />
         )}
-        {currentPage === "my" && <MyPage room={room} savedResults={savedResults} historicalPlayers={historicalPlayers} championBoards={championBoards} />}
+        {currentPage === "my" && (
+          <MyPage
+            room={room}
+            savedResults={savedResults}
+            historicalPlayers={historicalPlayers}
+            championBoards={championBoards}
+            onDeleteChampionBoard={deleteChampionBoard}
+          />
+        )}
       </div>
       <BottomNav currentPage={currentPage} role={currentRole} roomStatus={room.status} onNavigate={navigate} />
       <Toast message={toast} />
@@ -1059,11 +1077,13 @@ function MyPage({
   savedResults,
   historicalPlayers,
   championBoards,
+  onDeleteChampionBoard,
 }: {
   room: Room;
   savedResults: SavedResult[];
   historicalPlayers: HistoricalPlayer[];
   championBoards: ChampionBoard[];
+  onDeleteChampionBoard: (board: ChampionBoard) => void;
 }) {
   return (
     <>
@@ -1106,7 +1126,14 @@ function MyPage({
           {championBoards.length === 0 ? (
             <p className="text-sm font-bold text-inkBrown/65">暂无冠军榜，结算页生成后会出现在这里。</p>
           ) : (
-            championBoards.slice(0, 5).map((board) => <ChampionPodium key={board.id} board={board} />)
+            championBoards.slice(0, 5).map((board) => (
+              <div key={board.id} className="relative">
+                <button className="champion-delete-button" type="button" onClick={() => onDeleteChampionBoard(board)}>
+                  删除
+                </button>
+                <ChampionPodium board={board} />
+              </div>
+            ))
           )}
         </div>
       </ParchmentCard>

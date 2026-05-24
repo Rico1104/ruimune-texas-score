@@ -434,13 +434,9 @@ export function ChampionPodium({ board }: { board: ChampionBoard | null }) {
     <section className="champion-board">
       <div className="champion-rays" />
       <div className="champion-board-top">
-        <div>
+        <div className="champion-title-center">
           <p className="text-xs font-black tracking-[.18em] text-brassLight/75">睿mune 荣耀牌匾</p>
           <h3>冠军榜</h3>
-        </div>
-        <div className="champion-session">
-          <span>第 {board.sessionNumber} 场</span>
-          <strong>{formatShortDate(board.date)}</strong>
         </div>
       </div>
       <div className="champion-podium">
@@ -467,7 +463,7 @@ export function ChampionPodium({ board }: { board: ChampionBoard | null }) {
         <strong>CHAMPION</strong>
         <span>季军席</span>
       </div>
-      <p className="mt-3 text-center text-xs font-black text-brassLight/70">{board.roomName} · {board.roomId}</p>
+      <p className="mt-3 text-center text-xs font-black text-brassLight/70">{board.roomName}</p>
     </section>
   );
 }
