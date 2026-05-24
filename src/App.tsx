@@ -130,10 +130,10 @@ type ChampionDraftEntry = {
   score: string;
 };
 
-function buildDefaultChampionDraft(players: SavedResultPlayer[]): ChampionDraftEntry[] {
-  return ([1, 2, 3] as const).map((rank, index) => ({
+function buildEmptyChampionDraft(): ChampionDraftEntry[] {
+  return ([1, 2, 3] as const).map((rank) => ({
     rank,
-    name: players[index]?.name ?? "",
+    name: "",
     score: "",
   }));
 }
@@ -170,7 +170,7 @@ export default function App() {
   const [savedResults, setSavedResults] = useState<SavedResult[]>(() => readStorage(STORAGE.savedResults, []));
   const [championBoards, setChampionBoards] = useState<ChampionBoard[]>(() => readStorage(STORAGE.championBoards, []));
   const [championBoard, setChampionBoard] = useState<ChampionBoard | null>(null);
-  const [championDraft, setChampionDraft] = useState<ChampionDraftEntry[]>(() => buildDefaultChampionDraft(resultPlayersFrom(defaultPlayers)));
+  const [championDraft, setChampionDraft] = useState<ChampionDraftEntry[]>(() => buildEmptyChampionDraft());
   const [joinCode, setJoinCode] = useState("");
   const [toast, setToast] = useState("");
   const [playerModal, setPlayerModal] = useState<{ open: boolean; mode: "add" | "edit"; value: string; target?: Player }>({
@@ -262,7 +262,7 @@ export default function App() {
     setPlayers((prev) => prev.map((player) => resetForNewRoom(player, 1, adminName)));
     setLatestLogs([]);
     setChampionBoard(null);
-    setChampionDraft(buildDefaultChampionDraft(settlementPlayers));
+    setChampionDraft(buildEmptyChampionDraft());
     setCurrentPage("createRoom");
   };
 
@@ -347,7 +347,7 @@ export default function App() {
     setPlayers(nextPlayers);
     addHistoricalIfMissing(adminName);
     setChampionBoard(null);
-    setChampionDraft(buildDefaultChampionDraft(resultPlayersFrom(nextPlayers)));
+    setChampionDraft(buildEmptyChampionDraft());
     setRoom((prev) => ({
       ...prev,
       adminName,
@@ -378,27 +378,30 @@ export default function App() {
 
   const settleGame = () => {
     setRoom((prev) => ({ ...prev, status: "settled" }));
-    setChampionDraft(buildDefaultChampionDraft(settlementPlayers));
+    setChampionDraft(buildEmptyChampionDraft());
     setCurrentPage("settlement");
   };
 
   const saveChampionBoard = () => {
-    const entries: ChampionEntry[] = championDraft.map((entry) => ({
-      rank: entry.rank,
-      name: entry.name.trim(),
-      score: Number(entry.score),
-    }));
+    const entries: ChampionEntry[] = championDraft
+      .map((entry) => ({
+        rank: entry.rank,
+        name: entry.name.trim(),
+        score: entry.score.trim() === "" ? Number.NaN : Number(entry.score),
+      }))
+      .filter((entry) => entry.name || Number.isFinite(entry.score));
 
-    if (entries.some((entry) => !entry.name)) {
-      showToast("请选择前三名玩家");
+    const champion = entries.find((entry) => entry.rank === 1);
+    if (!champion?.name || !Number.isFinite(champion.score)) {
+      showToast("请至少填写冠军姓名和分数");
       return;
     }
     if (new Set(entries.map((entry) => entry.name)).size !== entries.length) {
-      showToast("前三名玩家不能重复");
+      showToast("上榜姓名不能重复");
       return;
     }
     if (entries.some((entry) => !Number.isFinite(entry.score))) {
-      showToast("请输入有效分数");
+      showToast("已填写姓名的名次需要输入有效分数");
       return;
     }
 
@@ -449,7 +452,7 @@ export default function App() {
     setPlayers((prev) => prev.map((player) => ({ ...player, baseBuyIn: room.defaultBuyIn, rebuy: 0 })));
     setRoom((prev) => ({ ...prev, status: "waiting", createdAt: nowIso() }));
     setChampionBoard(null);
-    setChampionDraft(buildDefaultChampionDraft(settlementPlayers));
+    setChampionDraft(buildEmptyChampionDraft());
     setCurrentRole("admin");
     setCurrentPage("roomLobby");
     showToast("新一局已准备好");
@@ -1000,7 +1003,7 @@ function SettlementPage({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="section-title">冠军榜录入</h2>
-                <p className="mt-1 text-xs font-black text-inkBrown/60">第 {sessionNumber} 场 · 选择前三名并填写分数</p>
+                <p className="mt-1 text-xs font-black text-inkBrown/60">第 {sessionNumber} 场 · 管理员手写姓名和分数，二三名可空缺</p>
               </div>
               <span className="mini-badge">管理员</span>
             </div>
@@ -1008,14 +1011,13 @@ function SettlementPage({
               {championDraft.map((entry) => (
                 <div key={entry.rank} className="champion-editor-row">
                   <span className="rank-medal rank-medal-top">{entry.rank}</span>
-                  <select className="paper-input" value={entry.name} onChange={(event) => updateDraft(entry.rank, "name", event.target.value)}>
-                    <option value="">选择玩家</option>
-                    {players.map((player) => (
-                      <option key={`${entry.rank}-${player.name}`} value={player.name}>
-                        {player.name}
-                      </option>
-                    ))}
-                  </select>
+                  <input
+                    className="paper-input"
+                    list="champion-player-names"
+                    placeholder={entry.rank === 1 ? "冠军姓名" : "可空缺"}
+                    value={entry.name}
+                    onChange={(event) => updateDraft(entry.rank, "name", event.target.value)}
+                  />
                   <input
                     className="paper-input"
                     inputMode="numeric"
@@ -1025,6 +1027,11 @@ function SettlementPage({
                   />
                 </div>
               ))}
+              <datalist id="champion-player-names">
+                {players.map((player) => (
+                  <option key={player.name} value={player.name} />
+                ))}
+              </datalist>
             </div>
             <TavernButton className="mt-4 w-full" onClick={onSaveChampionBoard} icon={<Save size={18} />}>
               生成冠军榜

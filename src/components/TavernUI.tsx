@@ -428,10 +428,11 @@ export function SettlementBoard({ players }: { players: SavedResultPlayer[] }) {
 
 export function ChampionPodium({ board }: { board: ChampionBoard | null }) {
   if (!board) return null;
-  const [first, second, third] = board.entries;
-  const displayEntries = [second, first, third].filter(Boolean);
+  const entryByRank = new Map(board.entries.map((entry) => [entry.rank, entry]));
+  const displayEntries = ([2, 1, 3] as const).map((rank) => entryByRank.get(rank) ?? null);
   return (
     <section className="champion-board">
+      <div className="champion-rays" />
       <div className="champion-board-top">
         <div>
           <p className="text-xs font-black tracking-[.18em] text-brassLight/75">睿mune 荣耀牌匾</p>
@@ -443,14 +444,28 @@ export function ChampionPodium({ board }: { board: ChampionBoard | null }) {
         </div>
       </div>
       <div className="champion-podium">
-        {displayEntries.map((entry) => (
-          <div key={entry.rank} className={cn("champion-place", entry.rank === 1 && "champion-place-first")}>
-            <span className="champion-medal">{entry.rank}</span>
-            <p className="champion-name">{entry.name}</p>
-            <strong>{entry.score}</strong>
-            <small>分</small>
+        {displayEntries.map((entry, index) => {
+          const rank = ([2, 1, 3] as const)[index];
+          return (
+          <div key={rank} className={cn("champion-place", `champion-place-rank-${rank}`, rank === 1 && "champion-place-first", !entry && "champion-place-empty")}>
+            <span className="champion-medal">{rank}</span>
+            <p className="champion-name">{entry?.name ?? "虚位以待"}</p>
+            {entry ? (
+              <>
+                <strong>{entry.score}</strong>
+                <small>分</small>
+              </>
+            ) : (
+              <small>未上榜</small>
+            )}
           </div>
-        ))}
+          );
+        })}
+      </div>
+      <div className="champion-stage">
+        <span>亚军席</span>
+        <strong>CHAMPION</strong>
+        <span>季军席</span>
       </div>
       <p className="mt-3 text-center text-xs font-black text-brassLight/70">{board.roomName} · {board.roomId}</p>
     </section>
