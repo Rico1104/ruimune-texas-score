@@ -44,6 +44,21 @@ export type SavedResultPlayer = {
   rank: number;
 };
 
+export type ChampionEntry = {
+  rank: 1 | 2 | 3;
+  name: string;
+  score: number;
+};
+
+export type ChampionBoard = {
+  id: string;
+  roomId: string;
+  roomName: string;
+  date: string;
+  sessionNumber: number;
+  entries: ChampionEntry[];
+};
+
 export type SavedResult = {
   id: string;
   roomId: string;
@@ -52,4 +67,5 @@ export type SavedResult = {
   date: string;
   players: SavedResultPlayer[];
   winner: string;
+  championBoard?: ChampionBoard;
 };

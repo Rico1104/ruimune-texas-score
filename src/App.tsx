@@ -13,6 +13,7 @@ import {
   RoomInfoCard,
   RuleCard,
   ScoreTable,
+  ChampionPodium,
   SettlementBoard,
   TavernButton,
   Toast,
@@ -23,7 +24,7 @@ import {
   rankPlayers,
 } from "./components/TavernUI";
 import { Copy, Plus, RefreshCw, Save, Share2, Sparkles, Users } from "lucide-react";
-import type { HistoricalPlayer, Page, Player, Role, Room, SavedResult, SavedResultPlayer } from "./types";
+import type { ChampionBoard, ChampionEntry, HistoricalPlayer, Page, Player, Role, Room, SavedResult, SavedResultPlayer } from "./types";
 
 const STORAGE = {
   room: "ruimune_room",
@@ -31,6 +32,7 @@ const STORAGE = {
   historicalPlayers: "ruimune_historical_players",
   latestLogs: "ruimune_latest_logs",
   savedResults: "ruimune_saved_results",
+  championBoards: "ruimune_champion_boards",
 };
 
 const nowIso = () => new Date().toISOString();
@@ -94,6 +96,7 @@ type SharedRoomPayload = {
   room: Room;
   players: Player[];
   latestLogs: string[];
+  championBoard?: ChampionBoard | null;
 };
 
 type OnlineRoomPayload = SharedRoomPayload & {
@@ -119,6 +122,20 @@ function resetForNewRoom(player: Player, defaultBuyIn: number, adminName: string
     baseBuyIn: defaultBuyIn,
     rebuy: 0,
   };
+}
+
+type ChampionDraftEntry = {
+  rank: 1 | 2 | 3;
+  name: string;
+  score: string;
+};
+
+function buildDefaultChampionDraft(players: SavedResultPlayer[]): ChampionDraftEntry[] {
+  return ([1, 2, 3] as const).map((rank, index) => ({
+    rank,
+    name: players[index]?.name ?? "",
+    score: "",
+  }));
 }
 
 function roomPath(roomId: string) {
@@ -151,6 +168,9 @@ export default function App() {
   );
   const [latestLogs, setLatestLogs] = useState<string[]>(() => readStorage(STORAGE.latestLogs, defaultLatestLogs));
   const [savedResults, setSavedResults] = useState<SavedResult[]>(() => readStorage(STORAGE.savedResults, []));
+  const [championBoards, setChampionBoards] = useState<ChampionBoard[]>(() => readStorage(STORAGE.championBoards, []));
+  const [championBoard, setChampionBoard] = useState<ChampionBoard | null>(null);
+  const [championDraft, setChampionDraft] = useState<ChampionDraftEntry[]>(() => buildDefaultChampionDraft(resultPlayersFrom(defaultPlayers)));
   const [joinCode, setJoinCode] = useState("");
   const [toast, setToast] = useState("");
   const [playerModal, setPlayerModal] = useState<{ open: boolean; mode: "add" | "edit"; value: string; target?: Player }>({
@@ -167,14 +187,15 @@ export default function App() {
   useEffect(() => localStorage.setItem(STORAGE.historicalPlayers, JSON.stringify(historicalPlayers)), [historicalPlayers]);
   useEffect(() => localStorage.setItem(STORAGE.latestLogs, JSON.stringify(latestLogs)), [latestLogs]);
   useEffect(() => localStorage.setItem(STORAGE.savedResults, JSON.stringify(savedResults)), [savedResults]);
+  useEffect(() => localStorage.setItem(STORAGE.championBoards, JSON.stringify(championBoards)), [championBoards]);
 
   useEffect(() => {
     if (currentRole !== "admin" || !onlineDatabaseUrl || !/^\d{4}$/.test(room.roomId)) return;
     const handle = window.setTimeout(() => {
-      void saveOnlineRoom({ room, players, latestLogs });
+      void saveOnlineRoom({ room, players, latestLogs, championBoard });
     }, 450);
     return () => window.clearTimeout(handle);
-  }, [currentRole, room, players, latestLogs]);
+  }, [currentRole, room, players, latestLogs, championBoard]);
 
   const showToast = (message: string) => {
     setToast(message);
@@ -207,6 +228,7 @@ export default function App() {
     setRoom(payload.room);
     setPlayers(payload.players);
     setLatestLogs(payload.latestLogs?.length ? payload.latestLogs : defaultLatestLogs);
+    setChampionBoard(payload.championBoard ?? null);
     setJoinCode(payload.room.roomId);
     setCurrentRole("player");
     setCurrentPage("joinRoom");
@@ -219,6 +241,7 @@ export default function App() {
   const selectedNames = players.map((player) => player.name);
   const settlementPlayers = useMemo(() => resultPlayersFrom(players), [players]);
   const winner = settlementPlayers[0]?.name ?? "暂无";
+  const nextSessionNumber = savedResults.length + (championBoard ? 0 : 1);
 
   const addHistoricalIfMissing = (name: string) => {
     setHistoricalPlayers((prev) =>
@@ -238,6 +261,8 @@ export default function App() {
     setRoom((prev) => ({ ...prev, adminName, status: "waiting", defaultBuyIn: 1 }));
     setPlayers((prev) => prev.map((player) => resetForNewRoom(player, 1, adminName)));
     setLatestLogs([]);
+    setChampionBoard(null);
+    setChampionDraft(buildDefaultChampionDraft(settlementPlayers));
     setCurrentPage("createRoom");
   };
 
@@ -321,6 +346,8 @@ export default function App() {
     }
     setPlayers(nextPlayers);
     addHistoricalIfMissing(adminName);
+    setChampionBoard(null);
+    setChampionDraft(buildDefaultChampionDraft(resultPlayersFrom(nextPlayers)));
     setRoom((prev) => ({
       ...prev,
       adminName,
@@ -351,7 +378,41 @@ export default function App() {
 
   const settleGame = () => {
     setRoom((prev) => ({ ...prev, status: "settled" }));
+    setChampionDraft(buildDefaultChampionDraft(settlementPlayers));
     setCurrentPage("settlement");
+  };
+
+  const saveChampionBoard = () => {
+    const entries: ChampionEntry[] = championDraft.map((entry) => ({
+      rank: entry.rank,
+      name: entry.name.trim(),
+      score: Number(entry.score),
+    }));
+
+    if (entries.some((entry) => !entry.name)) {
+      showToast("请选择前三名玩家");
+      return;
+    }
+    if (new Set(entries.map((entry) => entry.name)).size !== entries.length) {
+      showToast("前三名玩家不能重复");
+      return;
+    }
+    if (entries.some((entry) => !Number.isFinite(entry.score))) {
+      showToast("请输入有效分数");
+      return;
+    }
+
+    const board: ChampionBoard = {
+      id: championBoard?.id ?? `champion_${Date.now()}`,
+      roomId: room.roomId,
+      roomName: room.roomName,
+      date: championBoard?.date ?? nowIso(),
+      sessionNumber: championBoard?.sessionNumber ?? savedResults.length + 1,
+      entries,
+    };
+    setChampionBoard(board);
+    setChampionBoards((prev) => [board, ...prev.filter((item) => item.id !== board.id)]);
+    showToast("冠军榜已生成");
   };
 
   const saveResult = () => {
@@ -365,6 +426,7 @@ export default function App() {
       date,
       players: resultPlayers,
       winner: resultPlayers[0]?.name ?? "",
+      championBoard: championBoard ?? undefined,
     };
     setSavedResults((prev) => [result, ...prev]);
     setHistoricalPlayers((prev) => {
@@ -386,6 +448,8 @@ export default function App() {
   const newRound = () => {
     setPlayers((prev) => prev.map((player) => ({ ...player, baseBuyIn: room.defaultBuyIn, rebuy: 0 })));
     setRoom((prev) => ({ ...prev, status: "waiting", createdAt: nowIso() }));
+    setChampionBoard(null);
+    setChampionDraft(buildDefaultChampionDraft(settlementPlayers));
     setCurrentRole("admin");
     setCurrentPage("roomLobby");
     showToast("新一局已准备好");
@@ -457,6 +521,7 @@ export default function App() {
           setRoom(onlineRoom.room);
           setPlayers(onlineRoom.players);
           setLatestLogs(onlineRoom.latestLogs ?? []);
+          setChampionBoard(onlineRoom.championBoard ?? null);
           setCurrentRole("player");
           setCurrentPage(onlineRoom.room.status === "settled" ? "settlement" : "playerView");
           showToast("已进入线上房间");
@@ -541,11 +606,16 @@ export default function App() {
             role={currentRole}
             players={settlementPlayers}
             winner={winner}
+            championBoard={championBoard}
+            championDraft={championDraft}
+            sessionNumber={nextSessionNumber}
+            onChampionDraftChange={setChampionDraft}
+            onSaveChampionBoard={saveChampionBoard}
             onSave={saveResult}
             onNewRound={newRound}
           />
         )}
-        {currentPage === "my" && <MyPage room={room} savedResults={savedResults} historicalPlayers={historicalPlayers} />}
+        {currentPage === "my" && <MyPage room={room} savedResults={savedResults} historicalPlayers={historicalPlayers} championBoards={championBoards} />}
       </div>
       <BottomNav currentPage={currentPage} role={currentRole} roomStatus={room.status} onNavigate={navigate} />
       <Toast message={toast} />
@@ -884,6 +954,11 @@ function SettlementPage({
   role,
   players,
   winner,
+  championBoard,
+  championDraft,
+  sessionNumber,
+  onChampionDraftChange,
+  onSaveChampionBoard,
   onSave,
   onNewRound,
 }: {
@@ -891,9 +966,18 @@ function SettlementPage({
   role: Role;
   players: SavedResultPlayer[];
   winner: string;
+  championBoard: ChampionBoard | null;
+  championDraft: ChampionDraftEntry[];
+  sessionNumber: number;
+  onChampionDraftChange: (draft: ChampionDraftEntry[]) => void;
+  onSaveChampionBoard: () => void;
   onSave: () => void;
   onNewRound: () => void;
 }) {
+  const updateDraft = (rank: 1 | 2 | 3, field: "name" | "score", value: string) => {
+    onChampionDraftChange(championDraft.map((entry) => (entry.rank === rank ? { ...entry, [field]: value } : entry)));
+  };
+
   return (
     <>
       <WoodenSign title="本局结算" eyebrow="德州 · 当晚累计买入榜" />
@@ -909,6 +993,45 @@ function SettlementPage({
       </div>
       <div className="mx-5 mt-4">
         <RuleCard />
+      </div>
+      <div className="mx-5 mt-4">
+        {role === "admin" ? (
+          <ParchmentCard>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="section-title">冠军榜录入</h2>
+                <p className="mt-1 text-xs font-black text-inkBrown/60">第 {sessionNumber} 场 · 选择前三名并填写分数</p>
+              </div>
+              <span className="mini-badge">管理员</span>
+            </div>
+            <div className="mt-4 grid gap-3">
+              {championDraft.map((entry) => (
+                <div key={entry.rank} className="champion-editor-row">
+                  <span className="rank-medal rank-medal-top">{entry.rank}</span>
+                  <select className="paper-input" value={entry.name} onChange={(event) => updateDraft(entry.rank, "name", event.target.value)}>
+                    <option value="">选择玩家</option>
+                    {players.map((player) => (
+                      <option key={`${entry.rank}-${player.name}`} value={player.name}>
+                        {player.name}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    className="paper-input"
+                    inputMode="numeric"
+                    placeholder="分数"
+                    value={entry.score}
+                    onChange={(event) => updateDraft(entry.rank, "score", event.target.value.replace(/[^\d.-]/g, ""))}
+                  />
+                </div>
+              ))}
+            </div>
+            <TavernButton className="mt-4 w-full" onClick={onSaveChampionBoard} icon={<Save size={18} />}>
+              生成冠军榜
+            </TavernButton>
+          </ParchmentCard>
+        ) : null}
+        <ChampionPodium board={championBoard} />
       </div>
       {role === "admin" ? (
         <div className="mx-5 mt-4 grid grid-cols-2 gap-3">
@@ -928,10 +1051,12 @@ function MyPage({
   room,
   savedResults,
   historicalPlayers,
+  championBoards,
 }: {
   room: Room;
   savedResults: SavedResult[];
   historicalPlayers: HistoricalPlayer[];
+  championBoards: ChampionBoard[];
 }) {
   return (
     <>
@@ -965,6 +1090,16 @@ function MyPage({
                 <span className="text-xs font-black text-inkBrown/65">{formatShortDate(result.date)}</span>
               </div>
             ))
+          )}
+        </div>
+      </ParchmentCard>
+      <ParchmentCard className="mx-5 mt-4">
+        <h2 className="section-title">冠军榜</h2>
+        <div className="mt-3 grid gap-3">
+          {championBoards.length === 0 ? (
+            <p className="text-sm font-bold text-inkBrown/65">暂无冠军榜，结算页生成后会出现在这里。</p>
+          ) : (
+            championBoards.slice(0, 5).map((board) => <ChampionPodium key={board.id} board={board} />)
           )}
         </div>
       </ParchmentCard>

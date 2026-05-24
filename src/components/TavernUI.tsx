@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import type {
+  ChampionBoard,
   HistoricalPlayer,
   Page,
   Player,
@@ -422,6 +423,37 @@ export function SettlementBoard({ players }: { players: SavedResultPlayer[] }) {
         </div>
       ))}
     </div>
+  );
+}
+
+export function ChampionPodium({ board }: { board: ChampionBoard | null }) {
+  if (!board) return null;
+  const [first, second, third] = board.entries;
+  const displayEntries = [second, first, third].filter(Boolean);
+  return (
+    <section className="champion-board">
+      <div className="champion-board-top">
+        <div>
+          <p className="text-xs font-black tracking-[.18em] text-brassLight/75">睿mune 荣耀牌匾</p>
+          <h3>冠军榜</h3>
+        </div>
+        <div className="champion-session">
+          <span>第 {board.sessionNumber} 场</span>
+          <strong>{formatShortDate(board.date)}</strong>
+        </div>
+      </div>
+      <div className="champion-podium">
+        {displayEntries.map((entry) => (
+          <div key={entry.rank} className={cn("champion-place", entry.rank === 1 && "champion-place-first")}>
+            <span className="champion-medal">{entry.rank}</span>
+            <p className="champion-name">{entry.name}</p>
+            <strong>{entry.score}</strong>
+            <small>分</small>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-center text-xs font-black text-brassLight/70">{board.roomName} · {board.roomId}</p>
+    </section>
   );
 }
 
