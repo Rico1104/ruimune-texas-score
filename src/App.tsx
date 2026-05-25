@@ -158,6 +158,33 @@ async function loadOnlineRoom(roomId: string) {
   return (await response.json()) as OnlineRoomPayload | null;
 }
 
+function championBoardsPath(boardId?: string) {
+  const suffix = boardId ? `/${encodeURIComponent(boardId)}` : "";
+  return `${onlineDatabaseUrl}/rooms/__championBoards${suffix}.json`;
+}
+
+async function saveOnlineChampionBoard(board: ChampionBoard) {
+  if (!onlineDatabaseUrl) return;
+  await fetch(championBoardsPath(board.id), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(board),
+  });
+}
+
+async function deleteOnlineChampionBoard(boardId: string) {
+  if (!onlineDatabaseUrl) return;
+  await fetch(championBoardsPath(boardId), { method: "DELETE" });
+}
+
+async function loadOnlineChampionBoards() {
+  if (!onlineDatabaseUrl) return [];
+  const response = await fetch(championBoardsPath(), { method: "GET" });
+  if (!response.ok) throw new Error("Failed to load champion boards");
+  const data = (await response.json()) as Record<string, ChampionBoard> | null;
+  return Object.values(data ?? {}).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>("home");
   const [currentRole, setCurrentRole] = useState<Role>("admin");
@@ -196,6 +223,37 @@ export default function App() {
     }, 450);
     return () => window.clearTimeout(handle);
   }, [currentRole, room, players, latestLogs, championBoard]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadOnlineChampionBoards()
+      .then((boards) => {
+        if (!cancelled && boards.length) setChampionBoards(boards);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (currentRole !== "player" || !onlineDatabaseUrl || !/^\d{4}$/.test(room.roomId)) return;
+    const syncRoom = async () => {
+      try {
+        const onlineRoom = await loadOnlineRoom(room.roomId);
+        if (!onlineRoom?.room?.roomId || !Array.isArray(onlineRoom.players)) return;
+        setRoom(onlineRoom.room);
+        setPlayers(onlineRoom.players);
+        setLatestLogs(onlineRoom.latestLogs ?? []);
+        setChampionBoard(onlineRoom.championBoard ?? null);
+      } catch {
+        // Keep the last visible snapshot if the network flakes.
+      }
+    };
+    void syncRoom();
+    const handle = window.setInterval(syncRoom, 3500);
+    return () => window.clearInterval(handle);
+  }, [currentRole, room.roomId]);
 
   const showToast = (message: string) => {
     setToast(message);
@@ -415,6 +473,7 @@ export default function App() {
     };
     setChampionBoard(board);
     setChampionBoards((prev) => [board, ...prev.filter((item) => item.id !== board.id)]);
+    void saveOnlineChampionBoard(board);
     showToast("冠军榜已生成");
   };
 
@@ -425,6 +484,7 @@ export default function App() {
     if (championBoard?.id === board.id) {
       setChampionBoard(null);
     }
+    void deleteOnlineChampionBoard(board.id);
     showToast("冠军榜已删除");
   };
 
