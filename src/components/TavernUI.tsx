@@ -88,9 +88,7 @@ export function Header({ title = "睿mune", subtitle = "周末酒馆局", right 
         </button>
         <div className="min-w-0 flex-1">
           <h1 className="brand-title">{title}</h1>
-          <div className="mx-auto mt-1 w-fit rounded-full border border-brass/70 bg-tavernGreen/85 px-5 py-1 text-sm font-semibold tracking-[.18em] text-brassLight shadow-brass">
-            {subtitle}
-          </div>
+          <div className="brand-ribbon">{subtitle}</div>
         </div>
         {right ?? (
           <button className="round-badge" type="button" aria-label="规则">

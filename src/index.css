@@ -14,7 +14,7 @@ body,
 
 body {
   margin: 0;
-  font-family: "Georgia", "STSong", "Songti SC", "Noto Serif SC", serif;
+  font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", "STSong", "Noto Serif SC", serif;
   background: #1c100a;
 }
 
@@ -29,39 +29,109 @@ button {
 
 .phone-frame {
   isolation: isolate;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05), transparent 4%, transparent 96%, rgba(255, 255, 255, 0.04)),
+    #1b0e08;
+}
+
+.phone-frame::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  pointer-events: none;
+  z-index: 4;
+  border-radius: inherit;
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.72);
 }
 
 .tavern-bg {
   background:
-    radial-gradient(circle at 50% 7%, rgba(255, 188, 84, 0.24), transparent 22%),
-    radial-gradient(circle at 18% 12%, rgba(255, 205, 117, 0.12), transparent 17%),
-    radial-gradient(circle at 84% 14%, rgba(255, 205, 117, 0.1), transparent 18%),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 42px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.32), transparent 18%, transparent 82%, rgba(0, 0, 0, 0.32)),
-    linear-gradient(180deg, #2b1a10 0%, #1e110a 52%, #120905 100%);
+    radial-gradient(circle at 50% 6%, rgba(255, 190, 88, 0.38), transparent 18%),
+    radial-gradient(circle at 20% 15%, rgba(255, 194, 92, 0.18), transparent 13%),
+    radial-gradient(circle at 82% 13%, rgba(255, 194, 92, 0.18), transparent 12%),
+    linear-gradient(180deg, rgba(20, 10, 5, 0.04), rgba(0, 0, 0, 0.78)),
+    repeating-linear-gradient(90deg, rgba(255, 236, 181, 0.035) 0 2px, transparent 2px 36px),
+    repeating-linear-gradient(0deg, rgba(132, 75, 34, 0.15) 0 1px, transparent 1px 28px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.48), transparent 18%, transparent 82%, rgba(0, 0, 0, 0.5)),
+    linear-gradient(180deg, #372010 0%, #211108 54%, #100704 100%);
 }
 
 .tavern-bg::after {
   content: "";
   position: absolute;
   inset: 0;
-  opacity: 0.34;
+  opacity: 0.44;
   background-image:
-    linear-gradient(0deg, transparent 0 17px, rgba(119, 70, 34, 0.22) 18px, transparent 20px),
-    repeating-linear-gradient(90deg, rgba(255, 226, 158, 0.035) 0 1px, transparent 1px 5px);
+    radial-gradient(circle at 16% 20%, rgba(255, 197, 91, 0.08), transparent 12%),
+    radial-gradient(circle at 74% 18%, rgba(255, 197, 91, 0.09), transparent 11%),
+    linear-gradient(0deg, transparent 0 17px, rgba(119, 70, 34, 0.24) 18px, transparent 20px),
+    repeating-linear-gradient(90deg, rgba(255, 226, 158, 0.045) 0 1px, transparent 1px 5px);
   mix-blend-mode: overlay;
 }
 
 .brand-title {
   color: #d8b86a;
-  font-size: clamp(2.35rem, 11vw, 3.35rem);
+  font-size: clamp(3rem, 14vw, 4.4rem);
   font-weight: 900;
-  line-height: 0.95;
+  line-height: 0.82;
   letter-spacing: 0;
+  font-family: "Georgia", "Songti SC", "STSong", serif;
   text-shadow:
-    0 2px 0 #5a3418,
-    0 4px 12px rgba(0, 0, 0, 0.75),
-    0 0 22px rgba(255, 203, 106, 0.28);
+    0 1px 0 #fff0ad,
+    0 3px 0 #6f431c,
+    0 7px 12px rgba(0, 0, 0, 0.78),
+    0 0 22px rgba(255, 203, 106, 0.36);
+}
+
+.brand-title::before,
+.brand-title::after {
+  content: "⌁";
+  display: inline-block;
+  margin: 0 4px;
+  color: #caa45a;
+  font-size: 0.42em;
+  transform: translateY(-0.18em);
+  text-shadow: 0 2px 0 #4a270f;
+}
+
+.brand-ribbon {
+  position: relative;
+  width: fit-content;
+  margin: 7px auto 0;
+  border: 2px solid rgba(202, 164, 90, 0.9);
+  border-radius: 8px 8px 16px 16px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 228, 150, 0.18), transparent 45%),
+    linear-gradient(180deg, #1f563d, #102f22);
+  padding: 4px 24px 5px;
+  color: #f0d48b;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  box-shadow: 0 7px 12px rgba(0, 0, 0, 0.32), inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+  text-shadow: 0 2px 0 #0b1d15;
+}
+
+.brand-ribbon::before,
+.brand-ribbon::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  width: 19px;
+  height: 20px;
+  border: 2px solid rgba(202, 164, 90, 0.72);
+  background: #102f22;
+  z-index: -1;
+}
+
+.brand-ribbon::before {
+  left: -16px;
+  transform: skewY(-24deg);
+}
+
+.brand-ribbon::after {
+  right: -16px;
+  transform: skewY(24deg);
 }
 
 .round-badge {
@@ -74,12 +144,13 @@ button {
   justify-content: center;
   gap: 2px;
   border-radius: 999px;
-  border: 2px solid rgba(202, 164, 90, 0.9);
+  border: 3px double rgba(202, 164, 90, 0.95);
   background:
-    radial-gradient(circle at 50% 25%, rgba(232, 210, 162, 0.16), transparent 43%),
-    linear-gradient(145deg, #3a2415, #1b0e08);
-  color: #d8b86a;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.36), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    radial-gradient(circle at 50% 22%, rgba(232, 210, 162, 0.22), transparent 42%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 6px),
+    linear-gradient(145deg, #432817, #170b06);
+  color: #f0d48b;
+  box-shadow: 0 9px 18px rgba(0, 0, 0, 0.46), inset 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 -10px 18px rgba(0, 0, 0, 0.26);
 }
 
 .round-badge span {
@@ -90,16 +161,16 @@ button {
 .wooden-sign {
   position: relative;
   display: grid;
-  min-height: 96px;
+  min-height: 100px;
   place-items: center;
   overflow: hidden;
-  border: 2px solid rgba(202, 164, 90, 0.84);
-  border-radius: 22px;
+  border: 3px ridge rgba(202, 164, 90, 0.84);
+  border-radius: 18px;
   background:
-    radial-gradient(circle at 50% -20%, rgba(216, 184, 106, 0.22), transparent 34%),
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 2px, transparent 2px 10px),
-    linear-gradient(90deg, #3a2112, #5a351b 42%, #321b0e);
-  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.38), inset 0 0 0 2px rgba(50, 25, 10, 0.9);
+    radial-gradient(circle at 50% -20%, rgba(216, 184, 106, 0.25), transparent 34%),
+    repeating-linear-gradient(3deg, rgba(255, 255, 255, 0.035) 0 2px, transparent 2px 13px),
+    linear-gradient(90deg, #2a160b, #5d3519 42%, #271309);
+  box-shadow: 0 13px 0 rgba(30, 12, 5, 0.92), 0 18px 25px rgba(0, 0, 0, 0.45), inset 0 0 0 3px rgba(50, 25, 10, 0.88), inset 0 11px 16px rgba(255, 220, 137, 0.08);
 }
 
 .wooden-sign::before,
@@ -115,6 +186,14 @@ button {
 }
 
 .wooden-sign::before {
+  box-shadow: -3px -58px 0 -5px rgba(92, 52, 22, 0.92), inset 0 0 0 1px rgba(255, 223, 141, 0.25);
+}
+
+.wooden-sign::after {
+  box-shadow: 3px -58px 0 -5px rgba(92, 52, 22, 0.92), inset 0 0 0 1px rgba(255, 223, 141, 0.25);
+}
+
+.wooden-sign::before {
   left: 18px;
 }
 
@@ -126,25 +205,26 @@ button {
   position: relative;
   z-index: 1;
   color: #d8b86a;
-  font-size: clamp(2.35rem, 13vw, 4.4rem);
+  font-size: clamp(2.55rem, 14vw, 4.8rem);
   font-weight: 900;
   letter-spacing: 0;
-  text-shadow: 0 2px 0 #2a1307, 0 0 18px rgba(255, 203, 106, 0.26);
+  text-shadow: 0 1px 0 #fff0ad, 0 3px 0 #6d421c, 0 7px 12px rgba(0, 0, 0, 0.72), 0 0 18px rgba(255, 203, 106, 0.34);
 }
 
 .parchment-card {
   position: relative;
   overflow: hidden;
-  border: 2px solid rgba(202, 164, 90, 0.95);
-  border-radius: 14px;
+  border: 3px ridge rgba(202, 164, 90, 0.9);
+  border-radius: 16px;
   padding: 16px;
   background:
-    radial-gradient(circle at 16% 20%, rgba(255, 255, 255, 0.16), transparent 16%),
-    radial-gradient(circle at 88% 72%, rgba(88, 50, 22, 0.14), transparent 19%),
-    repeating-linear-gradient(45deg, rgba(58, 36, 21, 0.035) 0 1px, transparent 1px 9px),
-    linear-gradient(135deg, #edd9aa, #d7b879);
+    radial-gradient(circle at 16% 20%, rgba(255, 255, 255, 0.18), transparent 16%),
+    radial-gradient(circle at 88% 72%, rgba(88, 50, 22, 0.16), transparent 19%),
+    radial-gradient(circle at 10% 88%, rgba(76, 41, 16, 0.12), transparent 15%),
+    repeating-linear-gradient(45deg, rgba(58, 36, 21, 0.045) 0 1px, transparent 1px 9px),
+    linear-gradient(135deg, #edd9aa, #d4b26e);
   color: #3a2415;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.34), inset 0 0 18px rgba(92, 54, 20, 0.18);
+  box-shadow: 0 13px 0 rgba(29, 12, 5, 0.66), 0 18px 25px rgba(0, 0, 0, 0.36), inset 0 0 22px rgba(92, 54, 20, 0.24);
 }
 
 .parchment-card::before {
@@ -156,11 +236,24 @@ button {
   border-radius: 10px;
 }
 
+.parchment-card::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background:
+    radial-gradient(circle at 18% 24%, #7a451f 0 1px, transparent 2px),
+    radial-gradient(circle at 82% 70%, #7a451f 0 1px, transparent 2px),
+    radial-gradient(circle at 54% 42%, #7a451f 0 1px, transparent 2px);
+}
+
 .section-title {
   color: #3a2415;
-  font-size: 1.2rem;
+  font-size: 1.28rem;
   font-weight: 900;
   line-height: 1.1;
+  text-shadow: 0 1px 0 rgba(255, 238, 184, 0.56);
 }
 
 .tavern-button {
@@ -169,12 +262,14 @@ button {
   justify-content: center;
   gap: 8px;
   min-height: 44px;
-  border: 2px solid rgba(202, 164, 90, 0.88);
-  border-radius: 12px;
+  border: 3px ridge rgba(202, 164, 90, 0.88);
+  border-radius: 10px;
   font-weight: 900;
   letter-spacing: 0;
   color: #d8b86a;
-  box-shadow: 0 9px 0 rgba(30, 14, 7, 0.9), 0 14px 22px rgba(0, 0, 0, 0.28), inset 0 1px rgba(255, 255, 255, 0.12);
+  font-family: "Kaiti SC", "STKaiti", "KaiTi", serif;
+  text-shadow: 0 2px 0 #170b05;
+  box-shadow: 0 8px 0 rgba(30, 14, 7, 0.95), 0 14px 22px rgba(0, 0, 0, 0.32), inset 0 1px rgba(255, 255, 255, 0.14), inset 0 -10px 18px rgba(0, 0, 0, 0.2);
   transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
 }
 
@@ -192,13 +287,15 @@ button {
 .tavern-button-primary {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent),
-    linear-gradient(145deg, #1f513b, #0f2d20);
+    radial-gradient(circle at 30% 15%, rgba(216, 184, 106, 0.15), transparent 38%),
+    linear-gradient(145deg, #235c42, #0c261b);
 }
 
 .tavern-button-secondary {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent),
-    linear-gradient(145deg, #6b241f, #41120f);
+    radial-gradient(circle at 30% 15%, rgba(216, 184, 106, 0.12), transparent 38%),
+    linear-gradient(145deg, #76271f, #3c100c);
 }
 
 .tavern-button-danger {
@@ -213,6 +310,242 @@ button {
   box-shadow: none;
 }
 
+.home-hero {
+  position: relative;
+  overflow: hidden;
+  border: 3px ridge rgba(202, 164, 90, 0.88);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 12% 22%, rgba(104, 62, 26, 0.18), transparent 20%),
+    radial-gradient(circle at 86% 66%, rgba(104, 62, 26, 0.18), transparent 22%),
+    repeating-linear-gradient(-22deg, rgba(58, 36, 21, 0.055) 0 1px, transparent 1px 12px),
+    linear-gradient(135deg, #efdbae, #d1ad69);
+  padding: 20px 15px 17px;
+  color: #3a2415;
+  box-shadow: 0 12px 0 rgba(29, 12, 5, 0.78), 0 18px 26px rgba(0, 0, 0, 0.38), inset 0 0 24px rgba(85, 45, 17, 0.25);
+}
+
+.home-hero::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 9px;
+  border: 1px solid rgba(58, 36, 21, 0.25);
+  border-radius: 12px;
+}
+
+.home-hero::after {
+  content: "TEXAS\A HOLD'EM";
+  white-space: pre;
+  position: absolute;
+  left: 20px;
+  top: 96px;
+  width: 70px;
+  height: 70px;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(76, 41, 16, 0.24);
+  border-radius: 999px;
+  color: rgba(76, 41, 16, 0.28);
+  font: 900 12px/1.05 "Georgia", serif;
+  transform: rotate(-18deg);
+}
+
+.home-hero-copy {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.home-stamp {
+  color: rgba(76, 41, 16, 0.58);
+  font: 900 13px/1 "Georgia", serif;
+  letter-spacing: 0.08em;
+}
+
+.home-hero h2 {
+  margin: 7px 0 0;
+  color: #5b230f;
+  font-size: clamp(2.5rem, 13vw, 4rem);
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255, 237, 180, 0.68), 0 3px 0 rgba(118, 72, 31, 0.18);
+}
+
+.home-hero p {
+  color: #3a2415;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.home-divider {
+  width: 62%;
+  height: 1px;
+  margin: 12px auto 9px;
+  background: linear-gradient(90deg, transparent, rgba(58, 36, 21, 0.48), transparent);
+}
+
+.card-table-art {
+  position: relative;
+  z-index: 1;
+  height: 154px;
+  margin-top: 6px;
+}
+
+.poker-card {
+  position: absolute;
+  bottom: 13px;
+  left: 50%;
+  display: grid;
+  width: 58px;
+  height: 88px;
+  place-items: start;
+  border: 2px solid rgba(58, 36, 21, 0.3);
+  border-radius: 8px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.78), rgba(223, 197, 145, 0.95)),
+    #edd9aa;
+  padding: 8px;
+  color: #2b1609;
+  font: 900 24px/1 "Georgia", serif;
+  box-shadow: 0 8px 12px rgba(58, 36, 21, 0.28);
+  transform-origin: bottom center;
+}
+
+.card-a {
+  transform: translateX(-93px) rotate(-16deg);
+}
+
+.card-k {
+  color: #7a1c17;
+  transform: translateX(-42px) rotate(-6deg);
+}
+
+.card-q {
+  transform: translateX(8px) rotate(7deg);
+}
+
+.card-back {
+  transform: translateX(54px) rotate(14deg);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(202, 164, 90, 0.16), transparent 34%),
+    repeating-linear-gradient(45deg, rgba(216, 184, 106, 0.22) 0 2px, transparent 2px 7px),
+    linear-gradient(145deg, #1d3e2f, #06170f);
+}
+
+.chip-stack {
+  position: absolute;
+  bottom: 14px;
+  width: 60px;
+  height: 34px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 48%, #214f39 0 20px, #f1d38b 21px 23px, #153527 24px),
+    repeating-linear-gradient(90deg, transparent 0 9px, rgba(232, 210, 162, 0.82) 9px 13px);
+  box-shadow: 0 -9px 0 #6b241f, 0 -18px 0 #153527, 0 7px 12px rgba(58, 36, 21, 0.32);
+}
+
+.chip-stack-left {
+  left: 22px;
+}
+
+.chip-stack-right {
+  right: 22px;
+  bottom: 26px;
+  width: 48px;
+  height: 26px;
+  transform: rotate(-8deg);
+}
+
+.whiskey-glass {
+  position: absolute;
+  right: 25px;
+  top: 18px;
+  width: 52px;
+  height: 56px;
+  border: 3px solid rgba(76, 41, 16, 0.22);
+  border-top: 0;
+  border-radius: 6px 6px 15px 15px;
+  transform: rotate(8deg);
+}
+
+.whiskey-glass::before {
+  content: "";
+  position: absolute;
+  inset: 25px 5px 6px;
+  border-radius: 0 0 12px 12px;
+  background: rgba(121, 72, 27, 0.18);
+}
+
+.rule-plaque {
+  display: grid;
+  grid-template-columns: 86px 1fr;
+  gap: 13px;
+  align-items: center;
+  border: 3px ridge rgba(202, 164, 90, 0.82);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 88% 40%, rgba(216, 184, 106, 0.16), transparent 28%),
+    linear-gradient(145deg, rgba(22, 59, 43, 0.96), rgba(13, 35, 26, 0.98));
+  padding: 13px;
+  color: #f0d48b;
+  box-shadow: 0 10px 0 rgba(29, 12, 5, 0.76), 0 16px 22px rgba(0, 0, 0, 0.34), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.rule-badge {
+  display: grid;
+  min-height: 72px;
+  place-items: center;
+  border: 2px solid rgba(202, 164, 90, 0.78);
+  border-radius: 10px;
+  background: linear-gradient(145deg, #3a2415, #1c0d06);
+  text-align: center;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.rule-badge strong,
+.rule-badge span {
+  display: block;
+}
+
+.rule-badge strong {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.rule-badge span {
+  margin-top: -10px;
+  font: 900 11px/1 "Georgia", serif;
+  opacity: 0.78;
+}
+
+.rule-plaque p {
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45);
+}
+
+.rule-plaque p span {
+  color: #e9c573;
+}
+
+.tonight-title {
+  display: grid;
+  place-items: center;
+}
+
+.tonight-title span {
+  border: 3px ridge rgba(202, 164, 90, 0.86);
+  border-radius: 10px;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 8px),
+    linear-gradient(90deg, #2a160b, #5d3519, #2a160b);
+  padding: 6px 34px;
+  color: #d8b86a;
+  font-size: 23px;
+  font-weight: 900;
+  text-shadow: 0 2px 0 #1c0d06;
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
 .bottom-nav {
   position: absolute;
   bottom: 0;
@@ -221,10 +554,11 @@ button {
   z-index: 30;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-top: 1px solid rgba(202, 164, 90, 0.45);
+  border-top: 2px solid rgba(202, 164, 90, 0.55);
   background:
-    linear-gradient(180deg, rgba(83, 48, 25, 0.92), rgba(31, 17, 9, 0.98)),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 16px);
+    radial-gradient(circle at 13% 0%, rgba(255, 189, 83, 0.18), transparent 25%),
+    linear-gradient(180deg, rgba(83, 48, 25, 0.96), rgba(24, 12, 6, 0.99)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 16px);
   box-shadow: 0 -12px 26px rgba(0, 0, 0, 0.3);
 }
 
@@ -235,7 +569,7 @@ button {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  border-right: 1px solid rgba(202, 164, 90, 0.22);
+  border-right: 1px solid rgba(202, 164, 90, 0.28);
   color: rgba(216, 184, 106, 0.74);
   font-size: 13px;
   font-weight: 900;
@@ -247,8 +581,10 @@ button {
 
 .bottom-nav-item.active {
   color: #ffd987;
-  background: radial-gradient(circle at 50% 24%, rgba(255, 190, 79, 0.24), transparent 42%);
-  text-shadow: 0 0 12px rgba(255, 193, 86, 0.55);
+  background:
+    radial-gradient(circle at 50% 34%, rgba(255, 190, 79, 0.34), transparent 45%),
+    linear-gradient(180deg, rgba(82, 43, 17, 0.38), rgba(0, 0, 0, 0));
+  text-shadow: 0 0 12px rgba(255, 193, 86, 0.68), 0 2px 0 #1a0b05;
 }
 
 .wood-label {
@@ -801,22 +1137,30 @@ button {
 
 .mini-feature {
   display: flex;
-  min-height: 86px;
+  min-height: 112px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  border: 1px solid rgba(202, 164, 90, 0.74);
-  border-radius: 12px;
+  border: 3px ridge rgba(202, 164, 90, 0.72);
+  border-radius: 9px;
   background:
-    radial-gradient(circle at 50% 18%, rgba(216, 184, 106, 0.15), transparent 42%),
-    linear-gradient(145deg, #3a2415, #1d0e08);
+    radial-gradient(circle at 50% 18%, rgba(255, 245, 195, 0.18), transparent 42%),
+    repeating-linear-gradient(45deg, rgba(58, 36, 21, 0.035) 0 1px, transparent 1px 9px),
+    linear-gradient(145deg, #ead4a4, #c79f5c);
   padding: 10px;
   text-align: center;
-  color: #d8b86a;
-  font-size: 13px;
+  color: #3a2415;
+  font-size: 14px;
   font-weight: 900;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 0 rgba(29, 12, 5, 0.72), 0 14px 16px rgba(0, 0, 0, 0.28), inset 0 0 16px rgba(94, 54, 21, 0.18);
+}
+
+.mini-feature svg {
+  color: #4a2b18;
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 1px 0 rgba(255, 238, 184, 0.6));
 }
 
 .history-record {

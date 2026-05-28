@@ -739,9 +739,23 @@ function HomePage({ onCreate, onJoin }: { onCreate: () => void; onJoin: () => vo
   return (
     <>
       <WoodenSign title="德州牌局" eyebrow="今晚开牌" />
-      <div className="mx-5 mt-2 text-center">
-        <p className="text-lg font-black text-brassLight">只做德州 · 专注记分 · 好友开局</p>
-        <div className="mt-5 grid grid-cols-2 gap-3">
+      <section className="home-hero mx-5 mt-3">
+        <div className="home-hero-copy">
+          <p className="home-stamp">TEXAS HOLD'EM</p>
+          <h2>今晚开牌</h2>
+          <div className="home-divider" />
+          <p>只做德州 · 专注记分 · 好友开局</p>
+        </div>
+        <div className="card-table-art" aria-hidden="true">
+          <span className="chip-stack chip-stack-left" />
+          <span className="chip-stack chip-stack-right" />
+          <span className="poker-card card-a">A♠</span>
+          <span className="poker-card card-k">K♥</span>
+          <span className="poker-card card-q">Q♣</span>
+          <span className="poker-card card-back" />
+          <span className="whiskey-glass" />
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-3">
           <TavernButton size="lg" onClick={onCreate} icon={<Plus size={21} />}>
             创建房间
           </TavernButton>
@@ -749,16 +763,22 @@ function HomePage({ onCreate, onJoin }: { onCreate: () => void; onJoin: () => vo
             加入房间
           </TavernButton>
         </div>
-      </div>
-      <ParchmentCard className="mx-5 mt-5">
-        <h2 className="section-title">规则摘要</h2>
-        <div className="mt-3 grid gap-2 text-sm font-bold text-inkBrown/80">
-          <p>起手每人 1 个买入</p>
-          <p>每补 1 个买入记 +1</p>
-          <p>仅管理员可操作分数</p>
+      </section>
+      <section className="rule-plaque mx-5 mt-4">
+        <div className="rule-badge">
+          <strong>规则</strong>
+          <span>RULES</span>
         </div>
-      </ParchmentCard>
-      <div className="mx-5 mt-4 grid grid-cols-3 gap-3">
+        <div className="grid gap-2 text-sm font-black">
+          <p><span>★</span> 起手每人 1 个买入</p>
+          <p><span>★</span> 每补 1 个买入记 +1</p>
+          <p><span>★</span> 仅管理员可操作分数</p>
+        </div>
+      </section>
+      <div className="tonight-title mx-5 mt-5">
+        <span>今晚功能</span>
+      </div>
+      <div className="mx-5 mt-3 grid grid-cols-3 gap-3">
         {["创建4位房号", "房间实时同步", "查看本局结算"].map((item) => (
           <div key={item} className="mini-feature">
             <Sparkles size={18} />
