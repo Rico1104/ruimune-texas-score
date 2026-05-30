@@ -70,17 +70,38 @@ button {
 }
 
 .brand-title {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   color: #d8b86a;
   font-size: clamp(3rem, 14vw, 4.4rem);
   font-weight: 900;
   line-height: 0.82;
   letter-spacing: 0;
+  white-space: nowrap;
   font-family: "Georgia", "Songti SC", "STSong", serif;
   text-shadow:
     0 1px 0 #fff0ad,
     0 3px 0 #6f431c,
     0 7px 12px rgba(0, 0, 0, 0.78),
     0 0 22px rgba(255, 203, 106, 0.36);
+}
+
+.brand-title > span {
+  display: inline-block;
+}
+
+.brand-moon {
+  width: 0.52em;
+  height: 0.52em;
+  flex: 0 0 auto;
+  color: #f4d98b;
+  transform: translateY(-0.05em) rotate(-9deg);
+  filter:
+    drop-shadow(0 1px 0 #fff1b8)
+    drop-shadow(0 3px 0 #6f431c)
+    drop-shadow(0 7px 10px rgba(0, 0, 0, 0.62));
 }
 
 .brand-title::before,
@@ -1244,6 +1265,12 @@ button {
   .brand-title {
     font-size: clamp(2.25rem, 10.5vw, 3rem);
     line-height: 0.9;
+    gap: 4px;
+  }
+
+  .brand-moon {
+    width: 0.48em;
+    height: 0.48em;
   }
 
   .brand-title::before,

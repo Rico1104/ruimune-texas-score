@@ -6,6 +6,7 @@ import {
   Edit3,
   Home,
   Lock,
+  Moon,
   Plus,
   ScrollText,
   Shield,
@@ -78,7 +79,7 @@ type HeaderProps = {
   right?: React.ReactNode;
 };
 
-export function Header({ title = "睿mune", subtitle = "周末酒馆局", right }: HeaderProps) {
+export function Header({ title = "睿moon", subtitle = "周末酒馆局", right }: HeaderProps) {
   return (
     <header className="px-5 pb-2 pt-7 text-center">
       <div className="flex items-start justify-between gap-3">
@@ -87,7 +88,10 @@ export function Header({ title = "睿mune", subtitle = "周末酒馆局", right 
           <span>邀好友</span>
         </button>
         <div className="min-w-0 flex-1">
-          <h1 className="brand-title">{title}</h1>
+          <h1 className="brand-title">
+            <span>{title}</span>
+            <Moon className="brand-moon" size={30} fill="currentColor" />
+          </h1>
           <div className="brand-ribbon">{subtitle}</div>
         </div>
         {right ?? (
@@ -433,7 +437,7 @@ export function ChampionPodium({ board }: { board: ChampionBoard | null }) {
       <div className="champion-rays" />
       <div className="champion-board-top">
         <div className="champion-title-center">
-          <p className="text-xs font-black tracking-[.18em] text-brassLight/75">睿mune 荣耀牌匾</p>
+          <p className="text-xs font-black tracking-[.18em] text-brassLight/75">睿moon 荣耀牌匾</p>
           <h3>冠军榜</h3>
         </div>
       </div>

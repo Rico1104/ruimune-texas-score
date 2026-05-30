@@ -1,4 +1,4 @@
-# 睿mune 德州记分网页 Demo
+# 睿moon 德州记分网页 Demo
 
 移动端优先的德州买入记分 Demo，使用 React、TypeScript、Tailwind CSS 和 localStorage。
 

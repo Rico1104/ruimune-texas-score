@@ -551,10 +551,10 @@ export default function App() {
   };
 
   const inviteFriend = async () => {
-    const shareText = `睿mune 德州房间 ${room.roomId}：${buildShareUrl()}`;
+    const shareText = `睿moon 德州房间 ${room.roomId}：${buildShareUrl()}`;
     if (navigator.share) {
       try {
-        await navigator.share({ title: "睿mune 德州房间", text: shareText, url: buildShareUrl() });
+        await navigator.share({ title: "睿moon 德州房间", text: shareText, url: buildShareUrl() });
         return;
       } catch {
         // Fall back to copying below.
